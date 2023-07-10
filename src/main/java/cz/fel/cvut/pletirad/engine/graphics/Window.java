@@ -11,14 +11,19 @@ import cz.fel.cvut.pletirad.game.player.Player;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.List;
 
+/**
+ * Handles everything that has something to do with graphics
+ */
 
 public class Window {
+
     private final Stage stage;
     private final GameContainer gameContainer;
     private Canvas canvas;
@@ -26,6 +31,7 @@ public class Window {
     private Vector center;
     private GameStateManager gsm;
     private TurnBasedManager tbm = null;
+    private Image gameOverScreen = null;
 
     public Window(Stage stage, GameContainer gc) {
         this.stage = stage;
@@ -33,8 +39,17 @@ public class Window {
         this.gom = gc.getGameObjectManager();
         center = new Vector(gc.getWidth() / 2 - 50, gc.getHeight() / 2);
         gsm = GameStateManager.getGSM();
+        try {
+            gameOverScreen = new Image("Background/GameOver.png");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
+    /**
+     * Initialization of the canvas
+     * All props to our hero and saviour Ladislav Seredi
+     */
     public void initWindow() {
         canvas = new Canvas(gameContainer.getWidth(), gameContainer.getHeight());
         Pane pane = new Pane(canvas);
@@ -49,6 +64,10 @@ public class Window {
         stage.show();
     }
 
+    /**
+     * Called by GameLoop everytime game is supposed to render
+     * Function controls what and how is supposed to be rendered
+     */
     public void render() {
         gom = gameContainer.getGameObjectManager();
         if (gom == null) {
@@ -57,7 +76,14 @@ public class Window {
 
         switch (gsm.getGameState()) {
             case PLATFORMER:
+                if (tbm != null) {
+                    tbm = null;
+                }
                 renderPlatformer();
+                break;
+            case PAUSED:
+                renderPlatformer();
+                renderPauseMenu();
                 break;
             case COMBAT:
                 if (tbm == null) {
@@ -65,10 +91,20 @@ public class Window {
                 }
                 tbm.render(canvas.getGraphicsContext2D());
                 break;
+            case GAMEOVER:
+                GraphicsContext gc = canvas.getGraphicsContext2D();
+                gc.fillRect(0, 0, gameContainer.getWidth(), gameContainer.getHeight());
+                if (gameOverScreen != null) {
+                    gc.drawImage(gameOverScreen, 0, 0, gameOverScreen.getWidth(), gameOverScreen.getHeight(),
+                            0, 0, gameContainer.getWidth(), gameContainer.getHeight());
+                }
+                break;
         }
-
     }
 
+    /**
+     * Rendering in platformer mode of the game
+     */
     private void renderPlatformer() {
         Player player = gom.getPlayer();
         GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -77,7 +113,9 @@ public class Window {
 
         Vector cameraPos = gom.getPlayer().getPos().subtract(center);
         for (GameObject go : gom.getObjectList()) {
-            go.render(gc, cameraPos);
+            if(go.getPos().subtract(player.getPos()).magnitude() < 500) {
+                go.render(gc, cameraPos);
+            }
         }
 
 
@@ -96,6 +134,11 @@ public class Window {
         gc.strokeText("Items: ", 600, 20);
 
         gc.strokeText(info, 10, 20);
+    }
+
+    private void renderPauseMenu() {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gameContainer.getPauseMenu().renderPM(gc);
     }
 
 }

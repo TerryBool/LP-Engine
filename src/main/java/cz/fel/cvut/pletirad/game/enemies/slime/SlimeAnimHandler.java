@@ -5,12 +5,16 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
+/**
+ * Handler for all slime animations
+ * Extremely similar to players so just go peek at that one
+ */
+
 public class SlimeAnimHandler {
 
     private boolean allLoaded;
     private final double scalingFactor = 1.5;
     private boolean playOnce;
-    private long stopTime;
     private int facing;
     private int numOfFrames;
 
@@ -28,19 +32,19 @@ public class SlimeAnimHandler {
     public SlimeAnimHandler() {
         try {
             moveL = new SpriteSheet(new Image("Slime/blob move.png"), 8, 1,
-                    8, 80, 80, 10, scalingFactor);
+                    8, 80, 80, 6, scalingFactor);
 
             moveR = new SpriteSheet(new Image("Slime/blob move right.png"), 8, 1,
-                    8, 80, 80, 10, scalingFactor);
+                    8, 80, 80, 6, scalingFactor);
 
-            death = new SpriteSheet(new Image("Slime/blob death.png"), 8, 1,
-                    8, 80, 80, 15, scalingFactor);
+            death = new SpriteSheet(new Image("Slime/blob death.png"), 7, 1,
+                    7, 80, 80, 10, scalingFactor);
 
             attack = new SpriteSheet(new Image("Slime/blob attack.png"), 10, 1,
-                    10, 80, 80, 15, scalingFactor);
+                    10, 80, 80, 6, scalingFactor);
 
-            idle = new SpriteSheet(new Image("Slime/blob attack.png"), 8, 1,
-                    8, 80, 80, 15, scalingFactor);
+            idle = new SpriteSheet(new Image("Slime/blob idle.png"), 8, 1,
+                    8, 80, 80, 6, scalingFactor);
 
             allLoaded = true;
         } catch (Exception e) {
@@ -51,7 +55,7 @@ public class SlimeAnimHandler {
         }
         if (allLoaded) {
             currentAnim = moveL;
-            currentAnim.start();
+            currentAnim.resetAnim();
         }
     }
 
@@ -60,23 +64,32 @@ public class SlimeAnimHandler {
     }
 
     public void drawAnim(GraphicsContext gc, Point2D pos) {
-        if (!allLoaded) {
+        if (!allLoaded || currentAnim == null) {
             return;
         }
 
         if (playOnce) {
-            if (System.currentTimeMillis() > stopTime) {
-                currentAnim.stop();
+            if (numOfFrames == 0) {
+                currentAnim.resetAnim();
                 if (inCombat) {
-                    pIdle();
+                    if (death.equals(currentAnim)) {
+                        currentAnim = null;
+                        playOnce = false;
+                    } else {
+                        pIdle();
+                    }
                 } else {
                     pMove(facing);
                 }
-                currentAnim.start();
-                playOnce = false;
+            } else {
+                numOfFrames--;
             }
         }
-        currentAnim.drawSprite(gc, pos);
+
+        if (currentAnim != null) {
+            currentAnim.nextFrame();
+            currentAnim.drawSprite(gc, pos);
+        }
     }
 
     public void pMove(int dir) {
@@ -90,7 +103,7 @@ public class SlimeAnimHandler {
                 return;
             }
         }
-        currentAnim.stop();
+        currentAnim.resetAnim();
         if (dir < 0) {
             currentAnim = moveL;
             playOnce = false;
@@ -100,7 +113,7 @@ public class SlimeAnimHandler {
             playOnce = false;
         }
         facing = dir;
-        currentAnim.start();
+        currentAnim.resetAnim();
     }
 
     public void pIdle() {
@@ -108,11 +121,12 @@ public class SlimeAnimHandler {
         if (idle.equals(currentAnim)) {
             return;
         }
+        currentAnim.resetAnim();
 
-        playOnce = false;
-        currentAnim.stop();
         currentAnim = idle;
-        currentAnim.start();
+        playOnce = false;
+
+        currentAnim.resetAnim();
     }
 
     public void pAttack() {
@@ -120,16 +134,15 @@ public class SlimeAnimHandler {
             return;
         }
 
-        currentAnim.stop();
+        currentAnim.resetAnim();
         currentAnim = attack;
 
         playOnce = true;
         inCombat = true;
-        numOfFrames = 10;
-        // Current time + len of anim in ms (number of frames / fps of the animation)*1000
-        stopTime = System.currentTimeMillis() + (numOfFrames * 1000) / 15;
 
-        currentAnim.start();
+        numOfFrames = currentAnim.getTotalFrames()*currentAnim.getWaitFrames();
+
+        currentAnim.resetAnim();
     }
 
     public void pDeath() {
@@ -137,16 +150,15 @@ public class SlimeAnimHandler {
             return;
         }
 
-        currentAnim.stop();
+        currentAnim.resetAnim();
         currentAnim = death;
 
         playOnce = true;
-        inCombat = false;
-        numOfFrames = 8;
-        // Current time + len of anim in ms (number of frames / fps of the animation)*1000
-        stopTime = System.currentTimeMillis() + (numOfFrames * 1000) / 15;
+        inCombat = true;
 
-        currentAnim.start();
+        numOfFrames = currentAnim.getTotalFrames()*currentAnim.getWaitFrames();
+
+        currentAnim.resetAnim();
     }
 
     public void setScalingFactor(double scalingFactor) {

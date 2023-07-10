@@ -14,16 +14,18 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import java.util.logging.*;
+
 
 public class GameLoop extends Application {
 
     private Window gameWindow;
     private GameContainer gc;
     private AnimationTimer gameLoop;
-    private final double UPDATE_CAP = 1.0 / 60.0;
     private InputHandler inputHandler;
     private boolean paused = false;
     private GameStateManager gsm;
+    private static final Logger LOGR = Logger.getLogger("GameLoop");
 
     public static void main(String[] args) {
         launch(args);
@@ -40,27 +42,20 @@ public class GameLoop extends Application {
         gameWindow.initWindow();
         gameWindow.render();
 
+        LogManager.getLogManager().reset();
+        LOGR.setLevel(Level.ALL);
+        ConsoleHandler ch = new ConsoleHandler();
+        ch.setLevel(Level.ALL);
+        LOGR.addHandler(ch);
+        
         gameLoop = new AnimationTimer() {
-            double passedTime;
-            double firstTime;
-            double lastTime = System.nanoTime() / 10e8;
-            double unprocessedTime = 0;
+            long lastUpdate = 0;
 
             @Override
             public void handle(long now) { // in nanoseconds
-                boolean render = false;
-                firstTime = (double) now / 10e8;
-                passedTime = firstTime - lastTime;
-                lastTime = firstTime;
-
-                unprocessedTime += passedTime;
-
-                while (unprocessedTime >= UPDATE_CAP) {
-                    unprocessedTime -= UPDATE_CAP;
-                    render = true;
+                if (now - lastUpdate >= 33e5 ) {
+                    lastUpdate = now;
                     gc.update();
-                }
-                if (render) {
                     gameWindow.render();
                 }
             }
@@ -72,7 +67,8 @@ public class GameLoop extends Application {
             @Override
             public void handle(KeyEvent event) {
                 inputHandler.updateKeyPress(event.getCode());
-
+                LOGR.log(Level.INFO, "Key pressed {0}", event.getCode());
+                
                 if (event.getCode() == KeyCode.ESCAPE) {
                     if (GameStateManager.getGSM().getGameState() == GameState.GAMEOVER) {
                         primaryStage.close();
@@ -103,10 +99,10 @@ public class GameLoop extends Application {
             public void handle(MouseEvent me) {
                 if (me.getButton() == MouseButton.PRIMARY) {
                     Point2D mouseInput = new Point2D(me.getX(), me.getY());
+                    LOGR.log(Level.INFO, "Mouse clicked X: {0} Y: {1}", new Object[]{me.getX(), me.getY()});
                     inputHandler.bufferMouse(mouseInput);
                 }
             }
         });
     }
-
 }

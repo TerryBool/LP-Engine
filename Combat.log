@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2020-06-10T12:22:29.195370300Z</date>
+  <millis>1591791749195</millis>
+  <nanos>370300</nanos>
+  <sequence>14</sequence>
+  <logger>TurnBasedManager</logger>
+  <level>FINE</level>
+  <class>cz.fel.cvut.pletirad.engine.logic.TurnBasedManager</class>
+  <method>update</method>
+  <thread>17</thread>
+  <message>Enemy suffered 80</message>
+</record>

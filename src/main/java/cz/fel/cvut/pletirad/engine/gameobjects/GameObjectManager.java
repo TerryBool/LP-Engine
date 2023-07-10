@@ -4,7 +4,15 @@ import cz.fel.cvut.pletirad.game.player.Player;
 
 import java.util.ArrayList;
 
+/**
+ * Every game object in game is stored in here.
+ * This class is used for saving and loading purposes
+ */
+
 public class GameObjectManager {
+    /**
+     * List holding all of the current Game object in the game (gameObjectList)
+     */
     ArrayList<GameObject> gameObjectList;
 
     private Player player;

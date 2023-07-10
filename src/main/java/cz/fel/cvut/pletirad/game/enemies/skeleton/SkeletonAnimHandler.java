@@ -5,12 +5,17 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
+/**
+ * Handler for all skeleton animations
+ * Extremely similar to players so just go peek at that one
+ */
+
+
 public class SkeletonAnimHandler {
 
     private boolean allLoaded;
     private final double scalingFactor = 2;
     private boolean playOnce;
-    private long stopTime;
     private int facing;
     private int numOfFrames;
 
@@ -27,31 +32,27 @@ public class SkeletonAnimHandler {
 
     public SkeletonAnimHandler() {
         try {
-            moveL = new SpriteSheet(new Image("Skeleton/Skeleton move left.png"), 13, 1,
-                    13, 22, 33, 10, scalingFactor);
+            moveL = new SpriteSheet(new Image("Skeleton/Skeleton idle.png"), 11, 1,
+                    11, 24, 32, 6, scalingFactor);
 
-            moveR = new SpriteSheet(new Image("Skeleton/Skeleton move right.png"), 13, 1,
-                    13, 22, 33, 10, scalingFactor);
+            moveR = new SpriteSheet(new Image("Skeleton/Skeleton idle.png"), 11, 1,
+                    11, 24, 32, 6, scalingFactor);
 
             death = new SpriteSheet(new Image("Skeleton/Skeleton death.png"), 15, 1,
-                    15, 30, 32, 15, scalingFactor);
+                    15, 30, 32, 10, scalingFactor+0.5);
 
             attack = new SpriteSheet(new Image("Skeleton/Skeleton attack.png"), 18, 1,
-                    18, 40, 37, 15, scalingFactor);
+                    18, 40, 37, 6, scalingFactor + 0.5);
 
             idle = new SpriteSheet(new Image("Skeleton/Skeleton idle.png"), 11, 1,
-                    11, 22, 32, 15, scalingFactor);
+                    11, 24, 32, 6, scalingFactor + 0.5);
 
             allLoaded = true;
         } catch (Exception e) {
             allLoaded = false;
-            System.err.println("Animation load for Player failed!!");
-            System.err.println(e.getMessage());
-            System.err.println();
         }
         if (allLoaded) {
             currentAnim = moveL;
-            currentAnim.start();
         }
     }
 
@@ -60,23 +61,32 @@ public class SkeletonAnimHandler {
     }
 
     public void drawAnim(GraphicsContext gc, Point2D pos) {
-        if (!allLoaded) {
+
+        if (!allLoaded || currentAnim == null) {
             return;
         }
 
         if (playOnce) {
-            if (System.currentTimeMillis() > stopTime) {
-                currentAnim.stop();
+            if (numOfFrames == 0) {
+                currentAnim.resetAnim();
                 if (inCombat) {
-                    pIdle();
+                    if (death.equals(currentAnim)) {
+                        currentAnim = null;
+                    } else {
+                        pIdle();
+                    }
                 } else {
                     pMove(facing);
                 }
-                currentAnim.start();
-                playOnce = false;
+            } else {
+                numOfFrames--;
             }
         }
-        currentAnim.drawSprite(gc, pos);
+        
+        if (currentAnim != null) {
+            currentAnim.nextFrame();
+            currentAnim.drawSprite(gc, pos);
+        }
     }
 
     public void pMove(int dir) {
@@ -90,7 +100,7 @@ public class SkeletonAnimHandler {
                 return;
             }
         }
-        currentAnim.stop();
+        currentAnim.resetAnim();
         if (dir < 0) {
             currentAnim = moveL;
             playOnce = false;
@@ -100,7 +110,7 @@ public class SkeletonAnimHandler {
             playOnce = false;
         }
         facing = dir;
-        currentAnim.start();
+        currentAnim.resetAnim();
     }
 
     public void pIdle() {
@@ -109,10 +119,12 @@ public class SkeletonAnimHandler {
             return;
         }
 
-        playOnce = false;
-        currentAnim.stop();
+        currentAnim.resetAnim();
+
         currentAnim = idle;
-        currentAnim.start();
+        playOnce = false;
+
+        currentAnim.resetAnim();
     }
 
     public void pAttack() {
@@ -120,16 +132,15 @@ public class SkeletonAnimHandler {
             return;
         }
 
-        currentAnim.stop();
-        currentAnim = attack;
+        currentAnim.resetAnim();
 
+        currentAnim = attack;
         playOnce = true;
         inCombat = true;
-        numOfFrames = 18;
-        // Current time + len of anim in ms (number of frames / fps of the animation)*1000
-        stopTime = System.currentTimeMillis() + (numOfFrames * 1000) / 15;
 
-        currentAnim.start();
+        numOfFrames = currentAnim.getTotalFrames()*currentAnim.getWaitFrames();
+
+        currentAnim.resetAnim();
     }
 
     public void pDeath() {
@@ -137,16 +148,15 @@ public class SkeletonAnimHandler {
             return;
         }
 
-        currentAnim.stop();
+        currentAnim.resetAnim();
+
         currentAnim = death;
-
         playOnce = true;
-        inCombat = false;
-        numOfFrames = 15;
-        // Current time + len of anim in ms (number of frames / fps of the animation)*1000
-        stopTime = System.currentTimeMillis() + (numOfFrames * 1000) / 15;
+        inCombat = true;
 
-        currentAnim.start();
+        numOfFrames = currentAnim.getTotalFrames()*currentAnim.getWaitFrames();
+
+        currentAnim.resetAnim();
     }
 
     public void setScalingFactor(double scalingFactor) {
@@ -155,10 +165,6 @@ public class SkeletonAnimHandler {
         death.setScalingFactor(scalingFactor);
         idle.setScalingFactor(scalingFactor);
         attack.setScalingFactor(scalingFactor);
-    }
-
-    public void setFacing(int facing) {
-        this.facing = facing;
     }
 }
 

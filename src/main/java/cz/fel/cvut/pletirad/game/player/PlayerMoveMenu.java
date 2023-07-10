@@ -4,6 +4,7 @@ package cz.fel.cvut.pletirad.game.player;
 import cz.fel.cvut.pletirad.engine.gameobjects.Item;
 import cz.fel.cvut.pletirad.engine.gameobjects.Move;
 import cz.fel.cvut.pletirad.engine.inputs.MenuButton;
+import cz.fel.cvut.pletirad.game.player.moves.Heal;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
@@ -11,6 +12,10 @@ import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.List;
+
+/**
+ * Menu for choosing players move in turn based combat
+ */
 
 public class PlayerMoveMenu {
     private Rectangle2D mainBar;
@@ -48,6 +53,11 @@ public class PlayerMoveMenu {
         initMagicWindow();
     }
 
+    /**
+     * Checks active windows and displays them
+     *
+     * @param gc Graphics context of canvas
+     */
     public void render(GraphicsContext gc) {
         mainWindow(gc);
         if (activeAttackWin) {
@@ -59,8 +69,13 @@ public class PlayerMoveMenu {
         }
     }
 
+    /**
+     * Called after getting a mouse input. Used to get a move also opens and closes context windows
+     *
+     * @param mousePos Position of mouse input
+     * @return Chosen move if any was selected, null otherwise
+     */
     public Move onClick(Point2D mousePos) {
-        System.out.println(mousePos);
         Move move = null;
         if (mainBar.contains(mousePos)) {
             if (activeAttackWin) {
@@ -71,14 +86,20 @@ public class PlayerMoveMenu {
                     move = item.combatUse();
                     if (move == null) {
                         System.out.println("Item can't be used in combat");
+                    } else {
+                        player.getItemList().remove(item);
                     }
                 }
             } else if (activeMagicWin) {
                 move = checkMagic(mousePos);
-            } else {
-                checkMain(mousePos);
             }
+            checkMain(mousePos);
         } else {
+            activeMagicWin = false;
+            activeItemWin = false;
+            activeAttackWin = false;
+        }
+        if(move != null) {
             activeMagicWin = false;
             activeItemWin = false;
             activeAttackWin = false;
@@ -86,10 +107,17 @@ public class PlayerMoveMenu {
         return move;
     }
 
+    /**
+     * Checks if any sub windows need to be opened
+     *
+     * @param mousePos Position of mouse input
+     */
     private void checkMain(Point2D mousePos) {
+        activeAttackWin = false;
+        activeItemWin = false;
+        activeMagicWin = false;
         for (MenuButton mb : mainBarButtons) {
             if (mb.contains(mousePos)) {
-                System.out.println("Player clicked: " + mb.getName());
                 if ("Attack".equals(mb.getName())) {
                     activeAttackWin = true;
                 }
@@ -103,10 +131,15 @@ public class PlayerMoveMenu {
         }
     }
 
+    /**
+     * Checks attack window for move
+     *
+     * @param mousePos Position of mouse input
+     * @return Chosen move if any was selected, null otherwise
+     */
     private Move checkAttack(Point2D mousePos) {
         for (MenuButton mb : attackBarButtons) {
             if (mb.contains(mousePos)) {
-                System.out.println("Player clicked " + mb.getName());
                 for (Move move : player.getAttackList()) {
                     if (move.getMoveName().equals(mb.getName())) {
                         return move;
@@ -117,12 +150,22 @@ public class PlayerMoveMenu {
         return null;
     }
 
+    /**
+     * Checks magic window for moves
+     *
+     * @param mousePos Position of mouse input
+     * @return Chosen move if any was selected, null otherwise
+     */
     private Move checkMagic(Point2D mousePos) {
         for (MenuButton mb : magicBarButtons) {
             if (mb.contains(mousePos)) {
-                System.out.println("Player clicked " + mb.getName());
                 for (Move move : player.getMagicList()) {
                     if (move.getMoveName().equals(mb.getName())) {
+                        if(move instanceof Heal) {
+                            if(player.getMp() < 20) {
+                                move = null;
+                            }
+                        }
                         return move;
                     }
                 }
@@ -131,10 +174,16 @@ public class PlayerMoveMenu {
         return null;
     }
 
+    /**
+     * Checks item window for any item to use
+     *
+     * @param mousePos Position of mouse input
+     * @return Chosen move if any was selected, null otherwise
+     */
+
     private Item checkItems(Point2D mousePos) {
         for (MenuButton mb : itemBarButtons) {
             if (mb.contains(mousePos)) {
-                System.out.println("Player clicked " + mb.getName());
                 for (Item item : player.getItemList()) {
                     if (item.getDisplayName().equals(mb.getName())) {
                         return item;
@@ -145,7 +194,11 @@ public class PlayerMoveMenu {
         return null;
     }
 
-
+    /**
+     * Drawing main window on canvas
+     *
+     * @param gc Graphics context of canvas
+     */
     private void mainWindow(GraphicsContext gc) {
         gc.setFill(Color.BLUE);
         gc.setStroke(Color.WHITE);
@@ -161,6 +214,11 @@ public class PlayerMoveMenu {
         }
     }
 
+    /**
+     * Drawing attack window on canvas
+     *
+     * @param gc Graphics context of canvas
+     */
     private void attackWindow(GraphicsContext gc) {
         gc.setFill(Color.BLUE);
         gc.setStroke(Color.WHITE);
@@ -176,6 +234,11 @@ public class PlayerMoveMenu {
         }
     }
 
+    /**
+     * Drawing item window on canvas
+     *
+     * @param gc Graphics context of canvas
+     */
     private void itemWindow(GraphicsContext gc) {
         gc.setFill(Color.BLUE);
         gc.setStroke(Color.WHITE);
@@ -191,6 +254,11 @@ public class PlayerMoveMenu {
         }
     }
 
+    /**
+     * Drawing magic window on canvas
+     *
+     * @param gc Graphics context of canvas
+     */
     private void magicWindow(GraphicsContext gc) {
         gc.setFill(Color.BLUE);
         gc.setStroke(Color.WHITE);
@@ -206,16 +274,13 @@ public class PlayerMoveMenu {
         }
     }
 
+
     private void initMainBarButtons() {
         mainBarButtons.add(new MenuButton(mainBar.getMinX() + 8,
                 mainBar.getMinY() + 8, 40, 15, "Attack"));
 
         mainBarButtons.add(new MenuButton(mainBar.getMinX() + mainBar.getWidth() / 2 + 8, mainBar.getMinY() + 8
                 , 40, 15, "Items"));
-
-        mainBarButtons.add(new MenuButton(mainBar.getMinX() + 8 + mainBar.getWidth() / 2,
-                mainBar.getMinY() + 8 + mainBar.getHeight() / 2
-                , 40, 15, "Flee"));
 
         mainBarButtons.add(new MenuButton(mainBar.getMinX() + 8, mainBar.getMinY() + 8 + mainBar.getHeight() / 2
                 , 40, 15, "Magic"));

@@ -1,5 +1,9 @@
 package cz.fel.cvut.pletirad.engine.gameobjects;
 
+/**
+ * This enum helps with deciding how to interact with certain objects
+ */
+
 public enum Layers {
     UNDEF(0),
     GROUND(1),

@@ -2,13 +2,16 @@ package cz.fel.cvut.pletirad.game.player.moves;
 
 import cz.fel.cvut.pletirad.engine.gameobjects.Move;
 
+/**
+ * Attack with low base damage, but can perform a critical strike which doubles the damage
+ */
 public class QuickAttack extends Move {
 
     int previousDamage = 30;
 
     public QuickAttack() {
         moveCode = 200;
-        setDamageValue(30);
+        setDamageValue(25);
         setMoveName("Quick Attack");
     }
 

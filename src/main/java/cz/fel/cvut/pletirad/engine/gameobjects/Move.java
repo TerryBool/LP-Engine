@@ -1,10 +1,15 @@
 package cz.fel.cvut.pletirad.engine.gameobjects;
 
 
+/**
+ * Abstract move used in turn based combat.
+ */
+
 public abstract class Move {
 
-    // Player move code should start with 2
-    // Enemy move code should start with 4
+    /**
+     * Move code is used to decide what animation should be played in combat (moveCode)
+     */
     protected int moveCode;
     private int damageValue = 0;
     private int healingValue = 0;
@@ -22,8 +27,17 @@ public abstract class Move {
         this.defenseBuff = defenseBuff;
     }
 
+    /**
+     * Descriptive text that is supposed to inform about effect of move
+     *
+     * @return Text that is supposed to be displayed when performing the move.
+     */
     public abstract String fetchMoveText();
 
+    /**
+     * Is called before move is used so it can have special properties
+     * For example critical chance or miss chance for powerful moves
+     */
     public abstract void useMove();
 
     protected void setMoveName(String name) {

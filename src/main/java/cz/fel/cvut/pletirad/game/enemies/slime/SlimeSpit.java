@@ -2,6 +2,10 @@ package cz.fel.cvut.pletirad.game.enemies.slime;
 
 import cz.fel.cvut.pletirad.engine.gameobjects.Move;
 
+/**
+ * Slimes move.
+ */
+
 public class SlimeSpit extends Move {
 
     public SlimeSpit() {

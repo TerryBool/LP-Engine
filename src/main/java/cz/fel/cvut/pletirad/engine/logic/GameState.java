@@ -1,5 +1,9 @@
 package cz.fel.cvut.pletirad.engine.logic;
 
+/**
+ * Enum of all GameStates. It's used to help to decide how to handle rendering and updates
+ */
+
 public enum GameState {
     MENU(0),
     PLATFORMER(1),

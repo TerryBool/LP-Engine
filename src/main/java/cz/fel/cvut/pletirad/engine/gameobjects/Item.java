@@ -1,9 +1,19 @@
 package cz.fel.cvut.pletirad.engine.gameobjects;
 
+/**
+ * Abstract item
+ * Used for drops from enemies and to aide the player
+ */
+
 public abstract class Item {
+
     private String displayName = null;
     protected int id = 0;
     private Layers layer = Layers.ITEM;
+
+    /**
+     * Combat move is used in Turn based combat. If it's null then the item can't be used in combat (combatMove)
+     */
     private Move combatMove = null;
 
     protected Item() {

@@ -2,14 +2,23 @@ package cz.fel.cvut.pletirad.engine.logic;
 
 import cz.fel.cvut.pletirad.engine.gameobjects.GameObject;
 import cz.fel.cvut.pletirad.engine.gameobjects.GameObjectManager;
+import cz.fel.cvut.pletirad.engine.graphics.PauseMenu;
 import cz.fel.cvut.pletirad.engine.inputs.InputHandler;
+import javafx.geometry.Point2D;
 import javafx.stage.Stage;
 
 import java.util.Iterator;
 
+/**
+ * Handles every logic related things. Such as updates, call for collision detection,
+ * destroying objects and loading levels
+ */
+
 public class GameContainer {
 
     private GameObjectManager gom;
+    private LevelManager lm;
+    private PauseMenu pauseMenu;
     private CollisionDetector cd;
     private final InputHandler inputHandler;
     private final Stage stage;
@@ -29,24 +38,41 @@ public class GameContainer {
 
         // Testing stage initialization
         LevelManager lm = new LevelManager(gom, this.inputHandler, cd);
+        this.lm = lm;
+        pauseMenu = new PauseMenu(lm);
 
-        lm.generateLevel();
-        //gom = lm.loadTestingLevel();
+        //lm.generateLevel();
+        gom = lm.loadTestingLevel();
 
         if (gom.getObjectList().isEmpty() || gom.getPlayer() == null) {
             stage.close();
         }
-        lm.saveTestingLevel();
+        //lm.saveTestingLevel();
 
     }
 
+    /**
+     * Main update of the game, delegates who is supposed to handle update in certain game state
+     */
     public void update() {
         switch (gsm.getGameState()) {
             case PLATFORMER:
                 updatePlatformer();
+                inputHandler.getMouseInput();
                 break;
             case COMBAT:
                 gsm.getTBM().update();
+                break;
+            case PAUSED:
+                Point2D mousePos = inputHandler.getMouseInput();
+                if (mousePos != null) {
+                    if (pauseMenu.onClick(mousePos)) {
+                        gom = pauseMenu.getGameObjectManager();
+                        if (gom == null) {
+                            stage.close();
+                        }
+                    }
+                }
                 break;
             default:
                 break;
@@ -69,15 +95,24 @@ public class GameContainer {
         return gom;
     }
 
+    /**
+     * Calls updates on every game object and checks if they are supposed to be destroyed
+     */
     private void updatePlatformer() {
         Iterator<GameObject> gomIterator = gom.getObjectList().iterator();
         while (gomIterator.hasNext()) {
             GameObject go = gomIterator.next();
-            go.update();
-            cd.checkCollisions(go);
+            if(go.getPos().subtract(gom.getPlayer().getPos()).magnitude() < 500) {
+                go.update();
+            }
             if (go.getDestroy()) {
                 gomIterator.remove();
             }
         }
+        cd.checkCollisions(gom.getPlayer());
+    }
+
+    public PauseMenu getPauseMenu() {
+        return pauseMenu;
     }
 }

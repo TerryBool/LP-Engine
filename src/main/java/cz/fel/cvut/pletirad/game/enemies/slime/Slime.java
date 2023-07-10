@@ -1,28 +1,33 @@
 package cz.fel.cvut.pletirad.game.enemies.slime;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import cz.fel.cvut.pletirad.engine.HitBox;
 import cz.fel.cvut.pletirad.engine.Vector;
 import cz.fel.cvut.pletirad.engine.gameobjects.GameObject;
+import cz.fel.cvut.pletirad.engine.gameobjects.Item;
 import cz.fel.cvut.pletirad.engine.gameobjects.Layers;
 import cz.fel.cvut.pletirad.engine.gameobjects.Move;
 import cz.fel.cvut.pletirad.engine.gameobjects.gotypes.Enemy;
 import cz.fel.cvut.pletirad.engine.logic.CollisionDetector;
-import cz.fel.cvut.pletirad.game.enemies.skeleton.SkeletonSwing;
+import cz.fel.cvut.pletirad.game.items.potion.Potion;
 import javafx.scene.canvas.GraphicsContext;
 
 
+/**
+ * Green blob who moves withing certain boundaries
+ * Drops potion
+ */
+
 public class Slime extends Enemy {
 
-    private SlimeAnimHandler ah;
-    private CollisionDetector cd;
+    private SlimeAnimHandler ah = null;
     private final int HEIGHT = 70;
     private final int WIDTH = 40;
     private final double gravity = .2;
     private double speed = .5;
 
-    @JsonInclude
+    private boolean playedDeath = false;
+
     private int boundLeft;
-    @JsonInclude
     private int boundRight;
 
     private double velX;
@@ -33,44 +38,36 @@ public class Slime extends Enemy {
     private boolean loaded = false;
 
     public Slime() {
-        ah = new SlimeAnimHandler();
 
         setMaxHP(60);
         setHealth(60);
 
         setMana(30);
 
-        setMaxHP(60);
-        setHealth(60);
-
-        setMana(30);
-
-        if (!ah.isAllLoaded()) {
-            System.out.println("Error with loading");
-            killObject();
-        }
         boundLeft = -900;
         boundRight = -1100;
-        this.pos = new Vector(-1000, -1000);
+        pos = new Vector(-1000, -1000);
         setLayer(Layers.ENEMY);
-        spit = new SkeletonSwing();
+        spit = new SlimeSpit();
         updateHitBox();
         loaded = true;
     }
 
+    /**
+     * @param boundL Left boundary, he won't go beyond that
+     * @param boundR Right boundary, he won't go beyond that
+     * @param posX   Initial X position
+     * @param posY   Initial Y position
+     * @param cd     Collision detector
+     */
     public Slime(int boundL, int boundR, int posX, int posY, CollisionDetector cd) {
         this.cd = cd;
-        ah = new SlimeAnimHandler();
 
         setMaxHP(60);
         setHealth(60);
+        setMaxMP(0);
+        setMana(0);
 
-        setMana(30);
-
-        if (!ah.isAllLoaded()) {
-            System.out.println("Error with loading");
-            killObject();
-        }
         boundLeft = boundL;
         boundRight = boundR;
         this.pos = new Vector(posX, posY);
@@ -117,6 +114,15 @@ public class Slime extends Enemy {
 
     @Override
     public void render(GraphicsContext gc, Vector cameraOffset) {
+
+        if(ah == null) {
+            ah = new SlimeAnimHandler();
+            if(!ah.isAllLoaded()) {
+                killObject();
+                return;
+            }
+        }
+
         Vector position = pos.subtract(cameraOffset);
         ah.drawAnim(gc, position);
     }
@@ -127,7 +133,7 @@ public class Slime extends Enemy {
 
 
     public void updateHitBox() {
-        setHitBox(hitBox);
+        hitBox = new HitBox(pos.getX() + 44, pos.getY() + 10, WIDTH, HEIGHT);
     }
 
     private boolean isGrounded() {
@@ -144,12 +150,35 @@ public class Slime extends Enemy {
     }
 
     @Override
+    public Item fetchDrops() {
+        return new Potion();
+    }
+
+    @Override
+    public String fetchVictoryText() {
+        return "You have defeated slime.\nYou see potion and half corroded shoulder guard in his goo.\n" +
+                "You take potion and leave the useless shoulder guard there";
+    }
+
+    @Override
     public Move fetchMove() {
+        ah.pAttack();
         return spit;
     }
 
     @Override
     public void tbRender(GraphicsContext gc) {
+        if(ah == null) {
+            ah = new SlimeAnimHandler();
+            if(!ah.isAllLoaded()) {
+                killObject();
+                return;
+            }
+        }
+        if (!playedDeath && getHealth() <= 0) {
+            ah.pDeath();
+            playedDeath = true;
+        }
         ah.setScalingFactor(2);
         ah.drawAnim(gc, new Vector(500, 150));
     }

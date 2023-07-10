@@ -2,6 +2,10 @@ package cz.fel.cvut.pletirad.game.player.moves;
 
 import cz.fel.cvut.pletirad.engine.gameobjects.Move;
 
+/**
+ * One of the player attacks. This attack has high damage but can miss
+ */
+
 public class HeavyAttack extends Move {
 
     private boolean missed = false;
@@ -28,12 +32,12 @@ public class HeavyAttack extends Move {
 
     @Override
     public void useMove() {
-
         if (previousDamage != getDamageValue()) {
+            missed = false;
             setDamageValue(previousDamage);
         }
 
-        if (Math.random() < 0.4) {
+        if (Math.random() < 0.3) {
             previousDamage = getDamageValue();
             setDamageValue(0);
             missed = true;

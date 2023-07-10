@@ -19,7 +19,6 @@ public class Wall extends GameObject {
             render = true;
         } catch (Exception e) {
             render = false;
-            System.out.println("Image loading failed!");
         }
         pos = new Vector(-1000, -1000);
         hitBox = new HitBox(-1000, -1000, 16, 46);
@@ -32,7 +31,6 @@ public class Wall extends GameObject {
             render = true;
         } catch (Exception e) {
             render = false;
-            System.out.println("Image loading failed!");
         }
         pos = new Vector(x, y);
         hitBox = new HitBox(x, y, 16, 46);

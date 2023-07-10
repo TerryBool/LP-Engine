@@ -1,4 +1,4 @@
-package cz.fel.cvut.pletirad.game.testobjects;
+package cz.fel.cvut.pletirad.game.items.bomb;
 
 import cz.fel.cvut.pletirad.engine.HitBox;
 import cz.fel.cvut.pletirad.engine.Vector;
@@ -6,37 +6,40 @@ import cz.fel.cvut.pletirad.engine.gameobjects.GameObject;
 import cz.fel.cvut.pletirad.engine.gameobjects.Item;
 import cz.fel.cvut.pletirad.engine.gameobjects.Layers;
 import cz.fel.cvut.pletirad.engine.gameobjects.gotypes.PickUps;
-import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
-public class KeyObject extends PickUps {
+/**
+ * Pickup that gives player Item named Bomb
+ */
+
+public class BombObject extends PickUps {
 
     private Image sprite;
 
     private final int WIDTH = 42;
     private final int HEIGHT = 42;
 
-    public KeyObject() {
+    public BombObject() {
         setLayer(Layers.PICKUP);
         pos = new Vector(-1000, -1000);
         updateHitBox();
-        setItem(new Key());
+        setItem(new Bomb());
         try {
-            sprite = new Image("Environment/Key.png");
+            sprite = new Image("Environment/Bomb.png");
         } catch (Exception e) {
             e.printStackTrace();
             killObject();
         }
     }
 
-    public KeyObject(int posX, int posY) {
+    public BombObject(int posX, int posY) {
         setLayer(Layers.PICKUP);
         pos = new Vector(posX, posY);
         updateHitBox();
-        setItem(new Key());
+        setItem(new Bomb());
         try {
-            sprite = new Image("Environment/Key.png");
+            sprite = new Image("Environment/Bomb.png");
         } catch (Exception e) {
             e.printStackTrace();
             killObject();
@@ -50,7 +53,7 @@ public class KeyObject extends PickUps {
 
     @Override
     public void render(GraphicsContext gc, Vector cameraOffset) {
-        Point2D position = pos.subtract(cameraOffset);
+        Vector position = pos.subtract(cameraOffset);
         gc.drawImage(sprite, 0, 0, 64, 64, position.getX(), position.getY(), 42, 42);
     }
 
@@ -61,8 +64,6 @@ public class KeyObject extends PickUps {
 
     public void updateHitBox() {
         hitBox = new HitBox(pos.getX(), pos.getY(), WIDTH, HEIGHT);
-        setPos(pos);
-        setHitBox(hitBox);
     }
 
     @Override

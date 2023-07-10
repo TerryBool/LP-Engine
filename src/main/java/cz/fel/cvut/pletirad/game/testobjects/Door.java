@@ -6,12 +6,18 @@ import cz.fel.cvut.pletirad.engine.gameobjects.GameObject;
 import cz.fel.cvut.pletirad.engine.gameobjects.Item;
 import cz.fel.cvut.pletirad.engine.gameobjects.Layers;
 import cz.fel.cvut.pletirad.engine.gameobjects.gotypes.Interactable;
+import cz.fel.cvut.pletirad.game.items.key.Key;
 import cz.fel.cvut.pletirad.game.player.Player;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 
 import java.util.Iterator;
 import java.util.List;
+
+/**
+ * Interactable object. If player has a key it gets destroyed
+ */
 
 public class Door extends Interactable {
 
@@ -20,6 +26,7 @@ public class Door extends Interactable {
     private int width = 26;
     private int height = 47;
     private boolean loaded = false;
+    private double msgStart = -1;
 
     public Door(int posX, int posY) {
         interactionRange = new HitBox(posX - 10, posY, width + 20, height);
@@ -44,7 +51,6 @@ public class Door extends Interactable {
             render = true;
         } catch (Exception e) {
             render = false;
-            System.out.println("Image loading failed!");
         }
         pos = new Vector(-1000, -1000);
         hitBox = new HitBox(-1000, -1000, 48, 16);
@@ -67,7 +73,7 @@ public class Door extends Interactable {
                 return;
             }
         }
-        System.out.println("You are missing a key.");
+        msgStart = System.currentTimeMillis();
     }
 
     @Override
@@ -83,6 +89,18 @@ public class Door extends Interactable {
         Vector position = pos.subtract(cameraOffset);
         if (render) {
             gc.drawImage(sprite, position.getX(), position.getY());
+            if(msgStart != -1) {
+                gc.setFill(Color.BLUE);
+                gc.setStroke(Color.WHITE);
+                gc.setLineWidth(2);
+                gc.fillRoundRect(position.getX() + 30, position.getY() -30, 80,40,5,5);
+                gc.strokeRoundRect(position.getX() + 30, position.getY() -30, 80,40,5,5);
+                gc.setLineWidth(1);
+                gc.strokeText("You are \nmissing a key", position.getX() + 35, position.getY() - 15);
+            }
+            if (System.currentTimeMillis() - msgStart > 5000) {
+                msgStart = -1;
+            }
         }
     }
 

@@ -19,7 +19,6 @@ public class Platform extends GameObject {
             render = true;
         } catch (Exception e) {
             render = false;
-            System.out.println("Image loading failed!");
         }
         pos = new Vector(-1000, -1000);
         hitBox = new HitBox(-1000, -1000, 48, 16);
@@ -34,7 +33,6 @@ public class Platform extends GameObject {
             render = true;
         } catch (Exception e) {
             render = false;
-            System.out.println("Image loading failed!");
         }
         pos = new Vector(x, y);
         hitBox = new HitBox(x, y, 48, 16);

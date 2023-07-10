@@ -5,6 +5,10 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
+/**
+ * Holds every single animation for player and handles the way they are played
+ */
+
 public class PlayerAnimHandler {
 
     private boolean allLoaded;
@@ -35,11 +39,7 @@ public class PlayerAnimHandler {
     private SpriteSheet combatIdle;
 
     private SpriteSheet attackQ;
-    private SpriteSheet attackD;
     private SpriteSheet attackH;
-    private SpriteSheet cast;
-
-    private SpriteSheet death;
 
     private SpriteSheet peakR;
     private SpriteSheet peakL;
@@ -54,46 +54,37 @@ public class PlayerAnimHandler {
                     4, 1, 4, 50, 37, 8, scalingFactor);
 
             runR = new SpriteSheet(new Image("Adventurer animations/Adventurer run.png"),
-                    6, 1, 6, 50, 37, 10, scalingFactor);
+                    6, 1, 6, 50, 37, 6, scalingFactor);
 
             runL = new SpriteSheet(new Image("Adventurer animations/Adventurer runL.png"),
-                    6, 1, 6, 50, 37, 10, scalingFactor);
+                    6, 1, 6, 50, 37, 6, scalingFactor);
 
             jumpR = new SpriteSheet(new Image("Adventurer animations/Adventurer JumpRiseR.png"),
-                    5, 1, 5, 50, 37, 30, scalingFactor);
+                    5, 1, 5, 50, 37, 2, scalingFactor);
 
             jumpL = new SpriteSheet(new Image("Adventurer animations/Adventurer JumpRiseL.png"),
-                    5, 1, 5, 50, 37, 30, scalingFactor);
+                    5, 1, 5, 50, 37, 2, scalingFactor);
 
             fallL = new SpriteSheet(new Image("Adventurer animations/Adventurer JumpFallL.png"),
-                    2, 1, 2, 50, 37, 15, scalingFactor);
+                    2, 1, 2, 50, 37, 4, scalingFactor);
 
             fallR = new SpriteSheet(new Image("Adventurer animations/Adventurer JumpFallR.png"),
-                    2, 1, 2, 50, 37, 15, scalingFactor);
+                    2, 1, 2, 50, 37, 4, scalingFactor);
 
             landL = new SpriteSheet(new Image("Adventurer animations/Adventurer JumpRecL.png"),
-                    2, 1, 2, 50, 37, 10, scalingFactor);
+                    2, 1, 2, 50, 37, 6, scalingFactor);
 
             landR = new SpriteSheet(new Image("Adventurer animations/Adventurer JumpRecR.png"),
-                    2, 1, 2, 50, 37, 10, scalingFactor);
+                    2, 1, 2, 50, 37, 6, scalingFactor);
 
             combatIdle = new SpriteSheet(new Image("Adventurer animations/Adventurer Combat Idle.png"),
                     4, 1, 4, 50, 37, 10, scalingFactor);
 
-            attackD = new SpriteSheet(new Image("Adventurer animations/Adventurer D Slash.png"),
-                    12, 1, 12, 50, 37, 15, scalingFactor);
-
             attackH = new SpriteSheet(new Image("Adventurer animations/Adventurer H slash.png"),
-                    5, 1, 5, 50, 37, 15, scalingFactor);
+                    5, 1, 5, 50, 37, 6, scalingFactor);
 
             attackQ = new SpriteSheet(new Image("Adventurer animations/Adventurer Q Slash.png"),
-                    6, 1, 6, 50, 37, 15, scalingFactor);
-
-            cast = new SpriteSheet(new Image("Adventurer animations/Adventurer Cast.png"),
-                    3, 1, 3, 50, 37, 10, scalingFactor);
-
-            death = new SpriteSheet(new Image("Adventurer animations/Adventurer death.png"),
-                    5, 1, 5, 50, 37, 5, scalingFactor);
+                    6, 1, 6, 50, 37, 6, scalingFactor);
 
             peakL = new SpriteSheet(new Image("Adventurer animations/Adventurer JumpPeakL.png"),
                     1, 1, 1, 50, 37, 1, scalingFactor);
@@ -103,13 +94,10 @@ public class PlayerAnimHandler {
             allLoaded = true;
         } catch (Exception e) {
             allLoaded = false;
-            System.err.println("Animation load for Player failed!!");
-            System.err.println(e.getMessage());
-            System.err.println();
         }
         if (allLoaded) {
             currentAnim = idleR;
-            currentAnim.start();
+            currentAnim.resetAnim();
         }
     }
 
@@ -117,27 +105,39 @@ public class PlayerAnimHandler {
         return allLoaded;
     }
 
+    /**
+     * Draws current animation on given position. Also handles every animation that is supposed to be played only once
+     *
+     * @param gc  Graphics context of canvas
+     * @param pos Position where to draw current sprite of current animation
+     */
     public void drawAnim(GraphicsContext gc, Point2D pos) {
 
         if (!allLoaded) {
             return;
         }
 
-        if (playOnce) {
-            if (System.currentTimeMillis() > stopTime) {
-                currentAnim.stop();
-                if (inCombat) {
-                    currentAnim = combatIdle;
+        if(playOnce) {
+            if(numOfFrames == 0) {
+                currentAnim.resetAnim();
+                if(inCombat) {
+                    pIdle(0);
                 } else {
                     pIdle(facing);
                 }
-                currentAnim.start();
-                playOnce = false;
+            } else {
+                numOfFrames--;
             }
         }
+        currentAnim.nextFrame();
         currentAnim.drawSprite(gc, pos);
     }
 
+    /**
+     * Plays running animation in the right (as in correct) direction
+     *
+     * @param dir Direction of the animation, 1 if facing right, -1 if facing right
+     */
     public void pRun(int dir) {
         if (dir < 0) {
             if (runL.equals(currentAnim)) {
@@ -149,7 +149,6 @@ public class PlayerAnimHandler {
                 return;
             }
         }
-        currentAnim.stop();
         if (dir < 0) {
             currentAnim = runL;
             playOnce = false;
@@ -159,9 +158,14 @@ public class PlayerAnimHandler {
             playOnce = false;
         }
         facing = dir;
-        currentAnim.start();
+        currentAnim.resetAnim();
     }
 
+    /**
+     * Plays idle animation in the right (as in correct) direction
+     *
+     * @param dir Direction of the animation, 1 if facing right, -1 if facing right
+     */
     public void pIdle(int dir) {
         if (dir < 0) {
             if (idleL.equals(currentAnim)) {
@@ -179,7 +183,7 @@ public class PlayerAnimHandler {
             }
         }
         playOnce = false;
-        currentAnim.stop();
+        currentAnim.resetAnim();
         if (dir < 0) {
             currentAnim = idleL;
         }
@@ -190,9 +194,14 @@ public class PlayerAnimHandler {
             currentAnim = combatIdle;
         }
         facing = dir;
-        currentAnim.start();
+        currentAnim.resetAnim();
     }
 
+    /**
+     * Plays jump animation in the right (as in correct) direction
+     *
+     * @param dir Direction of the animation, 1 if facing right, -1 if facing right
+     */
     public void pJump(int dir) {
         if (dir < 0) {
             if (jumpL.equals(currentAnim)) {
@@ -205,27 +214,28 @@ public class PlayerAnimHandler {
             }
         }
 
-        currentAnim.stop();
+        currentAnim.resetAnim();
         if (dir < 0) {
             currentAnim = jumpL;
             playOnce = true;
             inCombat = false;
-            numOfFrames = 5;
-            // Current time + len of anim in ms (number of frames / fps of the animation)*1000
-            stopTime = System.currentTimeMillis() + (numOfFrames * 1000) / 30;
+            numOfFrames = currentAnim.getTotalFrames() * currentAnim.getWaitFrames();
         }
         if (dir > 0) {
             currentAnim = jumpR;
             playOnce = true;
             inCombat = false;
-            numOfFrames = 5;
-            // Current time + len of anim in ms (number of frames / fps of the animation)*1000
-            stopTime = System.currentTimeMillis() + (numOfFrames * 1000) / 30;
+            numOfFrames = currentAnim.getTotalFrames() * currentAnim.getWaitFrames();
         }
         facing = dir;
-        currentAnim.start();
+        currentAnim.resetAnim();
     }
 
+    /**
+     * Plays falling animation in the right (as in correct) direction
+     *
+     * @param dir Direction of the animation, 1 if facing right, -1 if facing right
+     */
     public void pFall(int dir) {
         if (dir < 0) {
             if (fallL.equals(currentAnim)) {
@@ -238,7 +248,7 @@ public class PlayerAnimHandler {
             }
         }
 
-        currentAnim.stop();
+        currentAnim.resetAnim();
         if (dir < 0) {
             currentAnim = fallL;
             playOnce = false;
@@ -248,9 +258,14 @@ public class PlayerAnimHandler {
             playOnce = false;
         }
         facing = dir;
-        currentAnim.start();
+        currentAnim.resetAnim();
     }
 
+    /**
+     * Plays jump peak animation in the right (as in correct) direction
+     *
+     * @param dir Direction of the animation, 1 if facing right, -1 if facing right
+     */
     public void pPeak(int dir) {
         if (dir < 0) {
             if (peakL.equals(currentAnim)) {
@@ -262,7 +277,7 @@ public class PlayerAnimHandler {
                 return;
             }
         }
-        currentAnim.stop();
+        currentAnim.resetAnim();
         if (dir < 0) {
             currentAnim = peakL;
             playOnce = false;
@@ -272,9 +287,14 @@ public class PlayerAnimHandler {
             playOnce = false;
         }
         facing = dir;
-        currentAnim.start();
+        currentAnim.resetAnim();
     }
 
+    /**
+     * Plays landing animation in the right (as in correct) direction
+     *
+     * @param dir Direction of the animation, 1 if facing right, -1 if facing right
+     */
     public void pLand(int dir) {
         if (dir < 0) {
             if (landL.equals(currentAnim)) {
@@ -287,110 +307,61 @@ public class PlayerAnimHandler {
             }
         }
 
-        currentAnim.stop();
+        currentAnim.resetAnim();
         if (dir < 0) {
             currentAnim = landL;
             playOnce = true;
             inCombat = false;
-            numOfFrames = 2;
-            // Current time + len of anim in ms (number of frames / fps of the animation)*1000
-            stopTime = System.currentTimeMillis() + (numOfFrames * 1000) / 10;
+            numOfFrames = currentAnim.getTotalFrames() * currentAnim.getWaitFrames();
         }
         if (dir > 0) {
             currentAnim = landR;
             playOnce = true;
             inCombat = false;
-            numOfFrames = 2;
-            // Current time + len of anim in ms (number of frames / fps of the animation)*1000
-            stopTime = System.currentTimeMillis() + (numOfFrames * 1000) / 10;
+            numOfFrames = currentAnim.getTotalFrames() * currentAnim.getWaitFrames();
         }
-        currentAnim.start();
+        currentAnim.resetAnim();
     }
 
-    public void pCast() {
-        if (cast.equals(currentAnim)) {
-            return;
-        }
-
-        currentAnim.stop();
-        currentAnim = cast;
-
-        playOnce = true;
-        numOfFrames = 3;
-        // Current time + len of anim in ms (number of frames / fps of the animation)*1000
-        stopTime = System.currentTimeMillis() + (numOfFrames * 1000) / 10;
-
-        currentAnim.start();
-    }
-
+    /**
+     * Plays quick attack animation
+     */
     public void pAttackQ() {
         if (attackQ.equals(currentAnim)) {
             return;
         }
 
-        currentAnim.stop();
+        currentAnim.resetAnim();
         currentAnim = attackQ;
 
         playOnce = true;
         inCombat = true;
-        numOfFrames = 6;
-        // Current time + len of anim in ms (number of frames / fps of the animation)*1000
-        stopTime = System.currentTimeMillis() + (numOfFrames * 1000) / 15;
+        numOfFrames = currentAnim.getTotalFrames() * currentAnim.getWaitFrames();
 
-        currentAnim.start();
+        currentAnim.resetAnim();
     }
 
-    public void pAttackD() {
-        if (attackD.equals(currentAnim)) {
-            return;
-        }
-
-        currentAnim.stop();
-        currentAnim = attackD;
-
-        playOnce = true;
-        inCombat = true;
-        numOfFrames = 12;
-        // Current time + len of anim in ms (number of frames / fps of the animation)*1000
-        stopTime = System.currentTimeMillis() + (numOfFrames * 1000) / 15;
-
-        currentAnim.start();
-    }
-
+    /**
+     * Plays hard attack animation
+     */
     public void pAttackH() {
         if (attackH.equals(currentAnim)) {
             return;
         }
 
-        currentAnim.stop();
+        currentAnim.resetAnim();
         currentAnim = attackH;
 
         playOnce = true;
         inCombat = true;
-        numOfFrames = 5;
-        // Current time + len of anim in ms (number of frames / fps of the animation)*1000
-        stopTime = System.currentTimeMillis() + (numOfFrames * 1000) / 15;
+        numOfFrames = currentAnim.getTotalFrames() * currentAnim.getWaitFrames();
 
-        currentAnim.start();
+        currentAnim.resetAnim();
     }
 
-    public void pDeath() {
-        if (death.equals(currentAnim)) {
-            return;
-        }
-
-        currentAnim.stop();
-        currentAnim = death;
-
-        playOnce = true;
-        inCombat = true;
-        numOfFrames = 5;
-        // Current time + len of anim in ms (number of frames / fps of the animation)*1000
-        stopTime = System.currentTimeMillis() + (numOfFrames * 1000) / 5;
-
-        currentAnim.start();
-    }
-
+    /**
+     * Huge setter for scaling factor
+     */
     public void setScalingFactor(double scalingFactor) {
         idleR.setScalingFactor(scalingFactor);
         idleL.setScalingFactor(scalingFactor);
@@ -409,11 +380,7 @@ public class PlayerAnimHandler {
         combatIdle.setScalingFactor(scalingFactor);
 
         attackQ.setScalingFactor(scalingFactor);
-        attackD.setScalingFactor(scalingFactor);
         attackH.setScalingFactor(scalingFactor);
-        cast.setScalingFactor(scalingFactor);
-
-        death.setScalingFactor(scalingFactor);
 
         peakR.setScalingFactor(scalingFactor);
         peakL.setScalingFactor(scalingFactor);

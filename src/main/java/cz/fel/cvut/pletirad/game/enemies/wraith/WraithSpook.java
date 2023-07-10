@@ -2,6 +2,10 @@ package cz.fel.cvut.pletirad.game.enemies.wraith;
 
 import cz.fel.cvut.pletirad.engine.gameobjects.Move;
 
+/**
+ * Scary damaging move used by Wraith
+ */
+
 public class WraithSpook extends Move {
 
     public WraithSpook() {

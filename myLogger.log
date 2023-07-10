@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="windows-1250" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2020-06-10T08:29:03.756304400Z</date>
+  <millis>1591777743756</millis>
+  <nanos>304400</nanos>
+  <sequence>0</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$4</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Mouse clicked X: 422,4 Y: 152</message>
+</record>
+<record>
+  <date>2020-06-10T08:29:04.539619400Z</date>
+  <millis>1591777744539</millis>
+  <nanos>619400</nanos>
+  <sequence>1</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$4</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Mouse clicked X: 470,4 Y: 88,8</message>
+</record>
+<record>
+  <date>2020-06-10T08:29:06.650982300Z</date>
+  <millis>1591777746650</millis>
+  <nanos>982300</nanos>
+  <sequence>2</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$4</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Mouse clicked X: 477,6 Y: 200</message>
+</record>
+<record>
+  <date>2020-06-10T08:29:07.179306800Z</date>
+  <millis>1591777747179</millis>
+  <nanos>306800</nanos>
+  <sequence>3</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$4</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Mouse clicked X: 456,8 Y: 259,2</message>
+</record>
+<record>
+  <date>2020-06-10T08:29:10.269078300Z</date>
+  <millis>1591777750269</millis>
+  <nanos>78300</nanos>
+  <sequence>4</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$2</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Key pressed D</message>
+</record>
+<record>
+  <date>2020-06-10T08:29:10.563068900Z</date>
+  <millis>1591777750563</millis>
+  <nanos>68900</nanos>
+  <sequence>5</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$2</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Key pressed W</message>
+</record>
+<record>
+  <date>2020-06-10T08:29:10.667153400Z</date>
+  <millis>1591777750667</millis>
+  <nanos>153400</nanos>
+  <sequence>6</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$2</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Key pressed A</message>
+</record>
+<record>
+  <date>2020-06-10T08:29:10.924596200Z</date>
+  <millis>1591777750924</millis>
+  <nanos>596200</nanos>
+  <sequence>7</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$2</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Key pressed D</message>
+</record>
+<record>
+  <date>2020-06-10T08:29:11.735258500Z</date>
+  <millis>1591777751735</millis>
+  <nanos>258500</nanos>
+  <sequence>8</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$2</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Key pressed D</message>
+</record>
+<record>
+  <date>2020-06-10T08:29:12.158848300Z</date>
+  <millis>1591777752158</millis>
+  <nanos>848300</nanos>
+  <sequence>9</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$2</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Key pressed A</message>
+</record>
+<record>
+  <date>2020-06-10T08:29:12.384184400Z</date>
+  <millis>1591777752384</millis>
+  <nanos>184400</nanos>
+  <sequence>10</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$2</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Key pressed E</message>
+</record>
+<record>
+  <date>2020-06-10T08:29:12.604874Z</date>
+  <millis>1591777752604</millis>
+  <nanos>874000</nanos>
+  <sequence>11</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$2</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Key pressed A</message>
+</record>
+<record>
+  <date>2020-06-10T08:29:13.101343500Z</date>
+  <millis>1591777753101</millis>
+  <nanos>343500</nanos>
+  <sequence>12</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$2</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Key pressed D</message>
+</record>
+<record>
+  <date>2020-06-10T08:29:13.187110400Z</date>
+  <millis>1591777753187</millis>
+  <nanos>110400</nanos>
+  <sequence>13</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$2</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Key pressed W</message>
+</record>
+<record>
+  <date>2020-06-10T08:29:14.268806400Z</date>
+  <millis>1591777754268</millis>
+  <nanos>806400</nanos>
+  <sequence>14</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$2</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Key pressed A</message>
+</record>
+<record>
+  <date>2020-06-10T08:29:15.418185700Z</date>
+  <millis>1591777755418</millis>
+  <nanos>185700</nanos>
+  <sequence>15</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$4</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Mouse clicked X: 218,4 Y: 280,8</message>
+</record>
+<record>
+  <date>2020-06-10T08:29:16.007012300Z</date>
+  <millis>1591777756007</millis>
+  <nanos>12300</nanos>
+  <sequence>16</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$4</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Mouse clicked X: 274,4 Y: 300,8</message>
+</record>
+<record>
+  <date>2020-06-10T08:29:23.961251600Z</date>
+  <millis>1591777763961</millis>
+  <nanos>251600</nanos>
+  <sequence>17</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$4</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Mouse clicked X: 266,4 Y: 282,4</message>
+</record>
+<record>
+  <date>2020-06-10T08:29:25.851220900Z</date>
+  <millis>1591777765851</millis>
+  <nanos>220900</nanos>
+  <sequence>18</sequence>
+  <logger>GameLoop</logger>
+  <level>INFO</level>
+  <class>cz.fel.cvut.pletirad.engine.GameLoop$4</class>
+  <method>handle</method>
+  <thread>16</thread>
+  <message>Mouse clicked X: 361,6 Y: 154,4</message>
+</record>
+</log>

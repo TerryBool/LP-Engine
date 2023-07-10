@@ -1,77 +1,78 @@
 package cz.fel.cvut.pletirad.game.enemies.wraith;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import cz.fel.cvut.pletirad.engine.HitBox;
 import cz.fel.cvut.pletirad.engine.Vector;
 import cz.fel.cvut.pletirad.engine.gameobjects.GameObject;
+import cz.fel.cvut.pletirad.engine.gameobjects.Item;
 import cz.fel.cvut.pletirad.engine.gameobjects.Layers;
 import cz.fel.cvut.pletirad.engine.gameobjects.Move;
 import cz.fel.cvut.pletirad.engine.gameobjects.gotypes.Enemy;
 import cz.fel.cvut.pletirad.engine.logic.CollisionDetector;
-import cz.fel.cvut.pletirad.game.enemies.skeleton.SkeletonSwing;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 
+/**
+ * Extremely lethal enemy with multiple moves but is stubborn enough to only use one
+ */
 
 public class Wraith extends Enemy {
 
-    private WraithAnimHandler ah;
-    private CollisionDetector cd;
-    private final int HEIGHT = 70;
+    private WraithAnimHandler ah = null;
+    private final int HEIGHT = 100;
     private final int WIDTH = 40;
     private final double gravity = .2;
     private double speed = .5;
 
-    @JsonInclude
     private int boundLeft;
-    @JsonInclude
     private int boundRight;
 
     private double velX;
     private double velY;
 
-    private Move spit;
+    private Move spook;
+    private Move lifesteal;
     private boolean loaded;
-
+    
+    private boolean playedDeath = false;
+    
     public Wraith() {
-        ah = new WraithAnimHandler();
-
-        setMaxHP(80);
-        setHealth(80);
-
+        setMaxHP(120);
+        setHealth(120);
+        setMaxMP(30);
         setMana(30);
 
-        if (!ah.isAllLoaded()) {
-            System.out.println("Error with loading");
-            killObject();
-        }
         boundLeft = -900;
         boundRight = -1100;
         this.pos = new Vector(-1000, -1000);
         setLayer(Layers.ENEMY);
-        spit = new SkeletonSwing();
+        spook = new WraithSpook();
+        lifesteal = new WraithDrain();
         updateHitBox();
         loaded = true;
     }
 
+    /**
+     * @param boundL Left boundary, he won't go beyond that
+     * @param boundR Right boundary, he won't go beyond that
+     * @param posX   Initial X position
+     * @param posY   Initial Y position
+     * @param cd     Collision detector
+     */
+
     public Wraith(int boundL, int boundR, int posX, int posY, CollisionDetector cd) {
         this.cd = cd;
-        ah = new WraithAnimHandler();
 
-        setMaxHP(80);
-        setHealth(80);
-
+        setMaxHP(120);
+        setHealth(120);
+        setMaxMP(30);
         setMana(30);
 
-        if (!ah.isAllLoaded()) {
-            System.out.println("Error with loading");
-            killObject();
-        }
         boundLeft = boundL;
         boundRight = boundR;
         this.pos = new Vector(posX, posY);
         setLayer(Layers.ENEMY);
-        spit = new WraithSpook();
+        spook = new WraithSpook();
+        lifesteal = new WraithDrain();
         updateHitBox();
     }
 
@@ -113,6 +114,13 @@ public class Wraith extends Enemy {
 
     @Override
     public void render(GraphicsContext gc, Vector cameraOffset) {
+        if(ah == null) {
+            ah = new WraithAnimHandler();
+            if(!ah.isAllLoaded()) {
+                killObject();
+                return;
+            }
+        }
         Vector position = (Vector) pos.subtract(cameraOffset);
         ah.drawAnim(gc, position);
     }
@@ -123,7 +131,7 @@ public class Wraith extends Enemy {
 
 
     public void updateHitBox() {
-        hitBox = new HitBox(pos.getX() + 44, pos.getY() + 10, WIDTH, HEIGHT);
+        hitBox = new HitBox(pos.getX() + 18, pos.getY() + 4, WIDTH, HEIGHT);
     }
 
     private boolean isGrounded() {
@@ -140,12 +148,40 @@ public class Wraith extends Enemy {
     }
 
     @Override
+    public Item fetchDrops() {
+        return null;
+    }
+
+    @Override
+    public String fetchVictoryText() {
+        return "You have defeated Wraith, its body,\n however dropped absolutely nothing";
+    }
+
+    @Override
     public Move fetchMove() {
-        return spit;
+        if(ah != null) {
+            ah.pAttack();
+        }
+        if (getHealth() <= 60 && getMana() > 0 ) {
+            setMana(getMana()-15);
+            return lifesteal;
+        }
+        return spook;
     }
 
     @Override
     public void tbRender(GraphicsContext gc) {
+        if(ah == null) {
+            ah = new WraithAnimHandler();
+            if(!ah.isAllLoaded()) {
+                killObject();
+                return;
+            }
+        }
+        if (!playedDeath && getHealth() <= 0) {
+            ah.pDeath();
+            playedDeath = true;
+        }
         ah.setScalingFactor(2);
         ah.drawAnim(gc, new Point2D(500, 150));
     }

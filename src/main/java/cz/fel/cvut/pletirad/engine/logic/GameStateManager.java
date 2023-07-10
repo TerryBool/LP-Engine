@@ -1,5 +1,9 @@
 package cz.fel.cvut.pletirad.engine.logic;
 
+/**
+ * Singleton used to hold current game state and turn based manager if player is in combat.
+ */
+
 public class GameStateManager {
     private static GameStateManager gameStateManager;
 

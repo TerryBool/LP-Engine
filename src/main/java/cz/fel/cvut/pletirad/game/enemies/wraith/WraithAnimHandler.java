@@ -5,12 +5,16 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
+/**
+ * Handler for all wraith animations
+ * Extremely similar to players so just go peek at that one
+ */
+
 public class WraithAnimHandler {
 
     private boolean allLoaded;
     private final double scalingFactor = 2;
     private boolean playOnce;
-    private long stopTime;
     private int facing;
     private int numOfFrames;
 
@@ -28,30 +32,27 @@ public class WraithAnimHandler {
     public WraithAnimHandler() {
         try {
             moveL = new SpriteSheet(new Image("Wraith/Wraith move left.png"), 4, 1,
-                    4, 48, 48, 10, scalingFactor);
+                    4, 48, 48, 6, scalingFactor);
 
             moveR = new SpriteSheet(new Image("Wraith/Wraith move right.png"), 4, 1,
-                    1, 48, 48, 10, scalingFactor);
+                    1, 48, 48, 6, scalingFactor);
 
             death = new SpriteSheet(new Image("Wraith/Wraith death.png"), 8, 1,
                     8, 48, 48, 15, scalingFactor);
 
             attack = new SpriteSheet(new Image("Wraith/Wraith attack.png"), 10, 1,
-                    10, 48, 48, 15, scalingFactor);
+                    10, 48, 48, 6, scalingFactor);
 
             idle = new SpriteSheet(new Image("Wraith/Wraith idle.png"), 4, 1,
-                    4, 48, 48, 15, scalingFactor);
+                    4, 48, 48, 6, scalingFactor);
 
             allLoaded = true;
         } catch (Exception e) {
             allLoaded = false;
-            System.err.println("Animation load for Player failed!!");
-            System.err.println(e.getMessage());
-            System.err.println();
         }
         if (allLoaded) {
             currentAnim = moveL;
-            currentAnim.start();
+            currentAnim.resetAnim();
         }
     }
 
@@ -60,23 +61,31 @@ public class WraithAnimHandler {
     }
 
     public void drawAnim(GraphicsContext gc, Point2D pos) {
-        if (!allLoaded) {
+        if (!allLoaded || currentAnim == null) {
             return;
         }
 
         if (playOnce) {
-            if (System.currentTimeMillis() > stopTime) {
-                currentAnim.stop();
+            if (numOfFrames == 0) {
+                currentAnim.resetAnim();
                 if (inCombat) {
-                    pIdle();
+                    if (death.equals(currentAnim)) {
+                        currentAnim = null;
+                    } else {
+                        pIdle();
+                    }
                 } else {
                     pMove(facing);
                 }
-                currentAnim.start();
-                playOnce = false;
+            } else {
+                numOfFrames--;
             }
         }
-        currentAnim.drawSprite(gc, pos);
+        
+        if (currentAnim != null) {
+            currentAnim.nextFrame();
+            currentAnim.drawSprite(gc, pos);
+        }
     }
 
     public void pMove(int dir) {
@@ -90,7 +99,7 @@ public class WraithAnimHandler {
                 return;
             }
         }
-        currentAnim.stop();
+        currentAnim.resetAnim();
         if (dir < 0) {
             currentAnim = moveL;
             playOnce = false;
@@ -100,7 +109,7 @@ public class WraithAnimHandler {
             playOnce = false;
         }
         facing = dir;
-        currentAnim.start();
+        currentAnim.resetAnim();
     }
 
     public void pIdle() {
@@ -108,11 +117,12 @@ public class WraithAnimHandler {
         if (idle.equals(currentAnim)) {
             return;
         }
+        currentAnim.resetAnim();
 
-        playOnce = false;
-        currentAnim.stop();
         currentAnim = idle;
-        currentAnim.start();
+        playOnce = false;
+
+        currentAnim.resetAnim();
     }
 
     public void pAttack() {
@@ -120,16 +130,15 @@ public class WraithAnimHandler {
             return;
         }
 
-        currentAnim.stop();
+        currentAnim.resetAnim();
         currentAnim = attack;
 
         playOnce = true;
         inCombat = true;
-        numOfFrames = 10;
-        // Current time + len of anim in ms (number of frames / fps of the animation)*1000
-        stopTime = System.currentTimeMillis() + (numOfFrames * 1000) / 15;
 
-        currentAnim.start();
+        numOfFrames = currentAnim.getTotalFrames()*currentAnim.getWaitFrames();
+
+        currentAnim.resetAnim();
     }
 
     public void pDeath() {
@@ -137,16 +146,14 @@ public class WraithAnimHandler {
             return;
         }
 
-        currentAnim.stop();
+        currentAnim.resetAnim();
         currentAnim = death;
 
         playOnce = true;
-        inCombat = false;
-        numOfFrames = 8;
-        // Current time + len of anim in ms (number of frames / fps of the animation)*1000
-        stopTime = System.currentTimeMillis() + (numOfFrames * 1000) / 15;
+        inCombat = true;
+        numOfFrames = currentAnim.getTotalFrames()*currentAnim.getWaitFrames();
 
-        currentAnim.start();
+        currentAnim.resetAnim();
     }
 
     public void setScalingFactor(double scalingFactor) {

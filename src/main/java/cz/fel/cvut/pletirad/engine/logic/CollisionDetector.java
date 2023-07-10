@@ -9,14 +9,31 @@ import cz.fel.cvut.pletirad.engine.gameobjects.gotypes.Interactable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Handles every collision in the game
+ */
+
 public class CollisionDetector {
 
+    /**
+     * List of objects in the game, received from GameObjectManager (gameObjects)
+     */
     ArrayList<GameObject> gameObjects;
 
     public CollisionDetector(ArrayList<GameObject> gameObjects) {
         this.gameObjects = gameObjects;
     }
 
+    /**
+     * Checks every collision with gameObject and calls gameObject.onCollision when it occurs
+     * <p>
+     * Ground objects are ignored when checking for collisions (no interaction is supposed to happen with them)
+     * Interactable objects use interaction range for collision instead of hit box
+     * Enemies use hit boxes for collision detection
+     * </p>
+     *
+     * @param gameObject Game object for which collisions will be checked
+     */
     public void checkCollisions(GameObject gameObject) {
         HitBox goHB = gameObject.getHitBox();
         if (goHB == null || gameObject.getLayer() == Layers.GROUND) {
@@ -51,17 +68,17 @@ public class CollisionDetector {
         this.gameObjects = gameObjects;
     }
 
-    /*
-     * Creates a temporary hit box and checks for collisions.
-     * If no collision occurs returns the destination back
-     * If collision occurs algorithm will try to find the highest distance it can go without collision in each axis.
-     * (Used for player physics. Without getting max distance on each axis player will start to wall cling.)
-     * */
+    /**
+     * Creates temporary hit box and tries to get him as far as possible for every direction
+     *
+     * @param hitBox Initial hit box which is used for casting
+     * @param dest   Final destination of hit box
+     * @return Vector with maximum distance hit box can move without colliding
+     */
 
     public Vector projectionCast(HitBox hitBox, Vector dest) {
         double scalar = 1;
         double minScalar = 1;
-        GameObject nearestObject = null;
 
         double height = hitBox.getHeight();
         double width = hitBox.getWidth();
@@ -149,10 +166,14 @@ public class CollisionDetector {
         return v.add(h);
     }
 
-    // Returns distance from go to game object with ground layer
-    // Takes normalized vectors and only in 8 directions
-    // Measures up to 50, then it will be waste of computation
-    public double rayCast(Vector pos, Vector normVector) {
+    /**
+     * Finds nearest ground object from certain position in given direction
+     *
+     * @param pos       Position from which is calculated distance
+     * @param direction Direction that is checked
+     * @return
+     */
+    public double rayCast(Vector pos, Vector direction) {
         double maxRange = 101;
         double leastDist = maxRange;
         double currentDist = 0;
@@ -162,7 +183,7 @@ public class CollisionDetector {
                 continue;
             }
             while (currentDist < 100) {
-                ray = (Vector) normVector.multiply(currentDist);
+                ray = (Vector) direction.multiply(currentDist);
                 if (gameObject.checkCollision(pos.add(ray))) {
                     leastDist = Math.min(currentDist, leastDist);
                     break;

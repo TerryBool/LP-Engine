@@ -14,23 +14,28 @@ import cz.fel.cvut.pletirad.engine.logic.CollisionDetector;
 import cz.fel.cvut.pletirad.engine.logic.GameState;
 import cz.fel.cvut.pletirad.engine.logic.GameStateManager;
 import cz.fel.cvut.pletirad.engine.logic.TurnBasedManager;
+import cz.fel.cvut.pletirad.game.items.potion.Potion;
+import cz.fel.cvut.pletirad.game.player.moves.Heal;
 import cz.fel.cvut.pletirad.game.player.moves.HeavyAttack;
 import cz.fel.cvut.pletirad.game.player.moves.QuickAttack;
-import cz.fel.cvut.pletirad.game.testobjects.Potion;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
-import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
+/**
+ * Controllable character
+ */
 
 public class Player extends GameObject {
 
     // Bigger collections
     private InputHandler ih;
     private CollisionDetector cd;
-    private final PlayerAnimHandler ah;
+    private PlayerAnimHandler ah;
     private PlayerMoveMenu pmm;
 
     // Physics, movement and help for rendering
@@ -38,12 +43,22 @@ public class Player extends GameObject {
     private final int WIDTH = 39;
 
     private double velX = 0;
+    private double velY = 0;
     private double maxSpeed = 4;
+
+    /**
+     * Ending lag is number of frames that player is unable to make inputs. Used after landing.
+     */
     private int endingLag;
+
     private int facing;
     private boolean jumping = true;
 
-    private double velY = 0;
+    /**
+     * ID of move that is supposed to be rendered in turn based combat (renderMove)
+     */
+    private int renderMove = 0;
+
     private double maxFallSpeed = 5;
     private final double gravity = .2;
 
@@ -73,6 +88,7 @@ public class Player extends GameObject {
         itemList.add(new Potion());
         attackList.add(new QuickAttack());
         attackList.add(new HeavyAttack());
+        magicList.add(new Heal());
 
         if (!ah.isAllLoaded()) {
             killObject();
@@ -80,6 +96,29 @@ public class Player extends GameObject {
         ah.pIdle(1);
     }
 
+    public Player(boolean testing) {
+        setLayer(Layers.PLAYER);
+
+        pos = new Vector(350, 180);
+        setPos(pos);
+        updateHitBox();
+
+        attackList = new ArrayList<>();
+        itemList = new ArrayList<>();
+        magicList = new ArrayList<>();
+
+        itemList.add(new Potion());
+        attackList.add(new QuickAttack());
+        attackList.add(new HeavyAttack());
+        magicList.add(new Heal());
+    }
+
+    /**
+     * Called if player is loaded through Jackson
+     *
+     * @param ih Input handler for player
+     * @param cd Collision detector
+     */
     public void initPlayer(InputHandler ih, CollisionDetector cd) {
         this.ih = ih;
         this.cd = cd;
@@ -90,26 +129,78 @@ public class Player extends GameObject {
         if (ih != null && cd != null) {
             move();
         }
+        if (pos.getY() > 500) {
+            GameStateManager.getGSM().setGameState(GameState.GAMEOVER);
+        }
+        // Uses potion if you press Q
+        if (ih.isDown(KeyCode.Q)) {
+            Iterator<Item> itemIterator = itemList.iterator();
+            while (itemIterator.hasNext()) {
+                Item item = itemIterator.next();
+                if (item instanceof Potion) {
+                    heal(item.combatUse().getHealingValue());
+                    itemIterator.remove();
+                    break;
+                }
+            }
+        }
+
         updateHitBox();
     }
 
     @Override
     public void render(GraphicsContext gc, Vector cameraOffset) {
         Vector camPosition = pos.subtract(cameraOffset);
-        Vector hitBoxPos = new Vector(hitBox.getMinX(), hitBox.getMinY());
-        hitBoxPos = hitBoxPos.subtract(cameraOffset);
-        gc.setFill(Color.GREEN);
-        //gc.fillRect(hitBoxPos.getX(), hitBoxPos.getY(), hitBox.getWidth(), hitBox.getHeight());
         ah.drawAnim(gc, camPosition);
     }
 
-    public void tbRender(GraphicsContext gc) {
-        ah.drawAnim(gc, new Vector(100, 170));
-        pmm.render(gc);
+    /**
+     * Turn based rendering for player. Currently with only a few attacks
+     *
+     * @param gc      Graphics context of canvas
+     * @param victory Info about combat state
+     */
+    public void tbRender(GraphicsContext gc, boolean victory) {
+        if (renderMove != 0) {
+            switch (renderMove) {
+                case 200:
+                    ah.pAttackQ();
+                    endingLag = 60;
+                    break;
+                case 201:
+                    ah.pAttackH();
+                    endingLag = 60;
+                    break;
+                default:
+                    break;
+            }
+            renderMove = 0;
+        }
+        endingLag = endingLag == 0 ? endingLag : --endingLag;
+        if (endingLag > 0) {
+            ah.drawAnim(gc, new Vector(450, 180));
+        } else {
+            ah.drawAnim(gc, new Vector(100, 170));
+        }
+        if (!victory) {
+            pmm.render(gc);
+        }
     }
 
+    /**
+     * Called by Turn based manager when it detects mouse input
+     *
+     * @param mouseInput Position of mouse input
+     * @return Move if any was chosen, null otherwise
+     */
     public Move getMove(Point2D mouseInput) {
         Move move = pmm.onClick(mouseInput);
+        if (move != null) {
+            renderMove = move.getMoveCode();
+            if(renderMove == 204) {
+                mp -= 20;
+            }
+        }
         return move;
     }
 
@@ -137,10 +228,16 @@ public class Player extends GameObject {
         }
     }
 
+    /**
+     * Function that wouldn't be needed if it weren't for JavaFX decision for making their Point2D and Rectangle2D final
+     */
     public void updateHitBox() {
         hitBox = new HitBox(pos.getX() + 18, pos.getY() + 8, WIDTH, HEIGHT);
     }
 
+    /**
+     * Controls movement of player has a little simulated physics
+     */
     private void move() {
         boolean grounded = isGrounded();
         boolean movingSide = false;
@@ -205,6 +302,11 @@ public class Player extends GameObject {
         pos = pos.add(move);
     }
 
+    /**
+     * Checks from all sides of player hit box if he is extremely near the ground.
+     *
+     * @return True if on ground, false otherwise
+     */
     private boolean isGrounded() {
         Vector down = new Vector(0, 1);
         double leftSideD = cd.rayCast(new Vector(hitBox.getMinX(), hitBox.getMaxY()), down);
@@ -218,6 +320,12 @@ public class Player extends GameObject {
         return false;
     }
 
+    /**
+     * Called from move, handles which animation is supposed to be playing.
+     *
+     * @param grounded   Info whether player is grounded or not
+     * @param movingSide True if player is moving sideways
+     */
     private void handleAnim(boolean grounded, boolean movingSide) {
         if (endingLag > 0) {
             ah.pLand(facing);

@@ -1,17 +1,21 @@
-package cz.fel.cvut.pletirad.game.testobjects;
+package cz.fel.cvut.pletirad.game.items.orb;
 
 import cz.fel.cvut.pletirad.engine.gameobjects.Item;
 import cz.fel.cvut.pletirad.engine.gameobjects.Move;
 
-public class Potion extends Item {
-    public Potion() {
-        setDisplayName("Potion");
-        id = 12;
-        Move move = new Move(0, 20, 0) {
+/**
+ * Healing item
+ */
+
+public class Orb extends Item {
+    public Orb() {
+        setDisplayName("Victory orb");
+        id = 13;
+        Move move = new Move(0, -1000, 0) {
 
             @Override
             public String fetchMoveText() {
-                return "Player used potion and regained 20 HP";
+                return "You dummy";
             }
 
             @Override
