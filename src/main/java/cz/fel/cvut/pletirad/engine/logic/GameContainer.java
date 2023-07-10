@@ -41,8 +41,8 @@ public class GameContainer {
         this.lm = lm;
         pauseMenu = new PauseMenu(lm);
 
-        //lm.generateLevel();
-        gom = lm.loadTestingLevel();
+        lm.generateLevel();
+        //gom = lm.loadTestingLevel();
 
         if (gom.getObjectList().isEmpty() || gom.getPlayer() == null) {
             stage.close();

@@ -166,9 +166,6 @@ public class LevelManager {
     public GameObjectManager loadTestingLevel() {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.enableDefaultTyping();
-            File file = new File(TESTING_LEVEL_NAME);
-            System.out.println(file.getAbsolutePath());
             GameObjectManager gom = objectMapper.readValue(new File(TESTING_LEVEL_NAME), GameObjectManager.class);
             cd.updateObjectList(gom.getObjectList());
             this.gom = gom;
